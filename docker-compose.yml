@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: my_secret_pw_shh
+      MYSQL_DATABASE: sivdev
+      MYSQL_USER: sivpack
+      MYSQL_PASSWORD: sivpack_dev
+    ports:
+      - "9906:3306"
+  api:
+    build:
+      context: .
+    container_name: crud_app
+    image: crud_api
+    command: ["gunicorn", "app:api", "-b", "0.0.0.0:7000", "--reload", "--timeout",  "100000"]
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    ports:
+      - "7000:7000"
+    stdin_open: true
+    tty: true
+  migrate:
+    image: boxfuse/flyway:4.2-alpine
+    depends_on:
+      - db
+    command: -url=jdbc:mysql://db/sivdev -user=sivpack -password=sivpack_dev migrate
+    volumes:
+      - ./sql:/flyway/sql

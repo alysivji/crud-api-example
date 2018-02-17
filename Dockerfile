@@ -17,4 +17,4 @@ EXPOSE 7000
 # Switch from root user for security
 USER sivpack
 
-CMD ["gunicorn", "app:app", "-b", "0.0.0.0:7000"]
+CMD ["gunicorn", "app:api", "-b", "0.0.0.0:7000"]
