@@ -1,0 +1,8 @@
+CREATE TABLE movie (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(191) NOT NULL,
+    `year` INTEGER NOT NULL,
+    `description` VARCHAR(1000) NOT NULL,
+
+    PRIMARY KEY (`id`)
+);

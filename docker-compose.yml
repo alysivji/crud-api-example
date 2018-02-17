@@ -13,7 +13,7 @@ services:
   api:
     build:
       context: .
-    container_name: crud_app
+    container_name: api_app
     image: crud_api
     command: ["gunicorn", "app:api", "-b", "0.0.0.0:7000", "--reload", "--timeout",  "100000"]
     depends_on:
