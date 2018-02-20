@@ -46,23 +46,27 @@ bulk_request_args = {
 }
 
 # queries
-INSERT_MOVIE_QUERY = """
-    INSERT INTO     movie(title, year, description)
-    VALUE           (%(title)s, %(year)s, %(description)s)"""
+DELETE_MOVIE_QUERY = """
+    DELETE FROM     movie
+    WHERE           id=%(id)s"""
+
+GET_COLLECTION_PAGINATION_QUERY = """
+    SELECT  *
+    FROM    movie
+    WHERE   id > %(start_with)s;"""
+
+GET_COLLECTION_QUERY = """
+    SELECT  *
+    FROM    movie;"""
 
 GET_ITEM_QUERY = """
     SELECT  *
     FROM    movie
     WHERE   id=%(id)s;"""
 
-GET_COLLECTION_QUERY = """
-    SELECT  *
-    FROM    movie;"""
-
-GET_COLLECTION_PAGINATION_QUERY = """
-    SELECT  *
-    FROM    movie
-    WHERE   id > %(start_with)s;"""
+INSERT_MOVIE_QUERY = """
+    INSERT INTO     movie(title, year, description)
+    VALUE           (%(title)s, %(year)s, %(description)s)"""
 
 UPDATE_MOVIE_QUERY = """
     UPDATE  movie
@@ -70,10 +74,6 @@ UPDATE_MOVIE_QUERY = """
             year=%(year)s,
             description=%(description)s
     WHERE   id=%(id)s;"""
-
-DELETE_MOVIE_QUERY = """
-    DELETE FROM movie
-    WHERE       id=%(id)s"""
 
 
 class MoviesItemResource:
