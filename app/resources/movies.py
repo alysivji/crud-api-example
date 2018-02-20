@@ -35,6 +35,21 @@ request_args = {
     'description': fields.String(location='json'),
 }
 
+bulk_request_args = {
+    'data': fields.List(
+        fields.Nested({
+            'title': fields.String(location='json'),
+            'year': fields.Int(location='json'),
+            'description': fields.String(location='json'),
+        })
+    )
+}
+
+# queries
+INSERT_MOVIE_QUERY = """
+    INSERT INTO     movie(title, year, description)
+    VALUE           (%(title)s, %(year)s, %(description)s)"""
+
 
 class MoviesItemResource:
     """Single resource"""
@@ -132,10 +147,6 @@ class MoviesCollectionResource:
         resp.status = falcon.HTTP_OK
         resp.media = movies
 
-    INSERT_MOVIE_QUERY = """
-        INSERT INTO     movie(title, year, description)
-        VALUE           (%(title)s, %(year)s, %(description)s)"""
-
     @use_args(request_args)
     def on_post(self, req, resp, args):
         try:
@@ -147,7 +158,26 @@ class MoviesCollectionResource:
         except KeyError:
             raise falcon.HTTPBadRequest()
 
-        req.cursor.execute(self.__class__.INSERT_MOVIE_QUERY, data)
+        req.cursor.execute(INSERT_MOVIE_QUERY, data)
+
+        movie_id = req.cursor.lastrowid
+        resp.location = '/movies/' + str(movie_id)
+        resp.status = falcon.HTTP_CREATED
+
+
+class MoviesBulkAddResource:
+    """Movies Bulk Add Resource"""
+    # TODO this might be a place to use Marshmallow, look into usecases
+
+    @use_args(bulk_request_args)
+    def on_post(self, req, resp, args):
+        try:
+            movies = args['data']
+        except KeyError:
+            raise falcon.HTTPBadRequest()
+
+        # TODO: should we do a try here?
+        req.cursor.executemany(INSERT_MOVIE_QUERY, movies)
 
         movie_id = req.cursor.lastrowid
         resp.location = '/movies/' + str(movie_id)
