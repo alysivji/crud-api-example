@@ -50,20 +50,37 @@ INSERT_MOVIE_QUERY = """
     INSERT INTO     movie(title, year, description)
     VALUE           (%(title)s, %(year)s, %(description)s)"""
 
+GET_ITEM_QUERY = """
+    SELECT  *
+    FROM    movie
+    WHERE   id=%(id)s;"""
+
+GET_COLLECTION_QUERY = """
+    SELECT  *
+    FROM    movie;"""
+
+GET_COLLECTION_PAGINATION_QUERY = """
+    SELECT  *
+    FROM    movie
+    WHERE   id > %(start_with)s;"""
+
+UPDATE_MOVIE_QUERY = """
+    UPDATE  movie
+    SET     title=%(title)s,
+            year=%(year)s,
+            description=%(description)s
+    WHERE   id=%(id)s;"""
+
+DELETE_MOVIE_QUERY = """
+    DELETE FROM movie
+    WHERE       id=%(id)s"""
+
 
 class MoviesItemResource:
     """Single resource"""
 
-    GET_ITEM_QUERY = """
-        SELECT  *
-        FROM    movie
-        WHERE   id=%(id)s;"""
-
     def on_get(self, req, resp, id_):
-        movie = get_only_result(
-            req.cursor,
-            self.__class__.GET_ITEM_QUERY,
-            {'id': id_})
+        movie = get_only_result(req.cursor, GET_ITEM_QUERY, {'id': id_})
 
         if not movie:
             raise falcon.HTTPNotFound()
@@ -71,20 +88,10 @@ class MoviesItemResource:
         resp.status = falcon.HTTP_OK
         resp.media = movie
 
-    UPDATE_MOVIE_QUERY = """
-        UPDATE  movie
-        SET     title=%(title)s,
-                year=%(year)s,
-                description=%(description)s
-        WHERE   id=%(id)s;"""
-
     @use_args(request_args)
     def on_put(self, req, resp, args, id_):
         # check to see if exists
-        movie = get_only_result(
-            req.cursor,
-            self.__class__.GET_ITEM_QUERY,
-            {'id': id_})
+        movie = get_only_result(req.cursor, GET_ITEM_QUERY, {'id': id_})
 
         if not movie:
             raise falcon.HTTPNotFound()
@@ -99,46 +106,31 @@ class MoviesItemResource:
         except KeyError:
             raise falcon.HTTPBadRequest()
 
-        req.cursor.execute(self.__class__.UPDATE_MOVIE_QUERY, data)
+        req.cursor.execute(UPDATE_MOVIE_QUERY, data)
         resp.status = falcon.HTTP_OK
-
-    DELETE_MOVIE_QUERY = """
-        DELETE FROM movie
-        WHERE       id=%(id)s"""
 
     def on_delete(self, req, resp, id_):
         # check to see if exists
-        movie = get_only_result(
-            req.cursor,
-            self.__class__.GET_ITEM_QUERY,
-            {'id': id_})
+        movie = get_only_result(req.cursor, GET_ITEM_QUERY, {'id': id_})
 
         if not movie:
             raise falcon.HTTPNotFound()
 
-        req.cursor.execute(self.__class__.DELETE_MOVIE_QUERY, {'id': id_})
+        req.cursor.execute(DELETE_MOVIE_QUERY, {'id': id_})
         resp.status = falcon.HTTP_OK
 
 
 class MoviesCollectionResource:
     """Movie collection"""
 
-    GET_COLLECTION_QUERY = """
-        SELECT  *
-        FROM    movie;"""
-
-    GET_COLLECTION_PAGINATION_QUERY = """
-        SELECT  *
-        FROM    movie
-        WHERE   id > %(start_with)s;"""
-
     def on_get(self, req, resp):
         # TODO add pagination
+        # use page=2 and limit and offset in the backend
         # what param should we send back to get it working?
         if 'next_record' in req.params:
             pass
 
-        req.cursor.execute(self.__class__.GET_COLLECTION_QUERY)
+        req.cursor.execute(GET_COLLECTION_QUERY)
         movies = req.cursor.fetchall()
 
         if not movies:
