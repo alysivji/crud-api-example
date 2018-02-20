@@ -1,6 +1,6 @@
 import falcon
 
-from .resources.movies import MoviesResource, MoviesCollectionResource
+from .resources.movies import MoviesItemResource, MoviesCollectionResource
 from .middleware.database import DatabaseCursor
 from .utils.database import database_connection
 
@@ -14,4 +14,4 @@ api = falcon.API(middleware=app_middleware)
 
 # routes
 api.add_route('/movies', MoviesCollectionResource())
-api.add_route('/movies/{id:int}', MoviesResource())
+api.add_route('/movies/{id:int}', MoviesItemResource())
