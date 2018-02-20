@@ -14,4 +14,4 @@ api = falcon.API(middleware=app_middleware)
 
 # routes
 api.add_route('/movies', MoviesCollectionResource())
-api.add_route('/movies/{id:int}', MoviesItemResource())
+api.add_route('/movies/{id_:int}', MoviesItemResource())

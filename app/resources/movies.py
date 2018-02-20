@@ -37,16 +37,18 @@ request_args = {
 
 
 class MoviesItemResource:
+    """Single resource"""
+
     GET_ITEM_QUERY = """
         SELECT  *
         FROM    movie
-        WHERE   id=%(id)s"""
+        WHERE   id=%(id)s;"""
 
-    def on_get(self, req, resp, id):
+    def on_get(self, req, resp, id_):
         movie = get_only_result(
             req.cursor,
             self.__class__.GET_ITEM_QUERY,
-            {'id': id})
+            {'id': id_})
 
         if not movie:
             raise falcon.HTTPNotFound()
@@ -54,43 +56,56 @@ class MoviesItemResource:
         resp.status = falcon.HTTP_OK
         resp.media = movie
 
+    UPDATE_MOVIE_QUERY = """
+        UPDATE  movie
+        SET     title=%(title)s,
+                year=%(year)s,
+                description=%(description)s
+        WHERE   id = %(id)s;"""
+
     @use_args(request_args)
-    def on_put(self, req, resp, args, id):
+    def on_put(self, req, resp, args, id_):
         # check to see if exists
         movie = get_only_result(
             req.cursor,
             self.__class__.GET_ITEM_QUERY,
-            {'id': id})
+            {'id': id_})
 
         if not movie:
             raise falcon.HTTPNotFound()
 
-        # TODO update database record
-        pass
+        data = {
+            'id': id,
+            'title': args['title'],
+            'year': args['year'],
+            'description': args['description']
+        }
+        req.cursor.execute(self.__class__.UPDATE_MOVIE_QUERY, data)
 
-    def on_delete(self, req, resp, id):
+        resp.status = falcon.HTTP_OK
+
+    def on_delete(self, req, resp, id_):
         # check to see if exists
         movie = get_only_result(
             req.cursor,
             self.__class__.GET_ITEM_QUERY,
-            {'id': id})
+            {'id': id_})
 
         if not movie:
             raise falcon.HTTPNotFound()
-
-        # TODO delete
-        pass
 
 
 class MoviesCollectionResource:
+    """Movie collection"""
+
     GET_COLLECTION_QUERY = """
         SELECT  *
-        FROM    movie"""
+        FROM    movie;"""
 
     GET_COLLECTION_PAGINATION_QUERY = """
         SELECT  *
         FROM    movie
-        WHERE   id > %(start_with)s"""
+        WHERE   id > %(start_with)s;"""
 
     def on_get(self, req, resp):
         # TODO add pagination
@@ -107,7 +122,7 @@ class MoviesCollectionResource:
         resp.status = falcon.HTTP_OK
         resp.media = movies
 
-    ADD_MOVIE_QUERY = """
+    INSERT_MOVIE_QUERY = """
         INSERT INTO     movie(title, year, description)
         VALUE           (%(title)s, %(year)s, %(description)s)"""
 
@@ -115,10 +130,8 @@ class MoviesCollectionResource:
     def on_post(self, req, resp, args):
         # what happens if we send more than one? try that in the test
 
-        # Todo, grab each field from args and construct data
         data = req.media
-
-        req.cursor.execute(self.__class__.ADD_MOVIE_QUERY, data)
+        req.cursor.execute(self.__class__.INSERT_MOVIE_QUERY, data)
         movie_id = req.cursor.lastrowid
         resp.location = '/movies/' + str(movie_id)
 
