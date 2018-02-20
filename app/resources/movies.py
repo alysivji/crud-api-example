@@ -1,4 +1,6 @@
 import falcon
+from webargs import fields
+from webargs.falconparser import use_args
 
 # Done
 # Create
@@ -21,8 +23,17 @@ import falcon
 
 
 def get_only_result(cursor, query, params):
+    """Given cursor, query, and params, return item"""
     cursor.execute(query, params)
     return cursor.fetchone()
+
+
+request_args = {
+    'id': fields.Int(location='json'),
+    'title': fields.String(location='json'),
+    'year': fields.Int(location='json'),
+    'description': fields.String(location='json'),
+}
 
 
 class MoviesItemResource:
@@ -43,7 +54,8 @@ class MoviesItemResource:
         resp.status = falcon.HTTP_OK
         resp.media = movie
 
-    def on_put(self, req, resp, id):
+    @use_args(request_args)
+    def on_put(self, req, resp, args, id):
         # check to see if exists
         movie = get_only_result(
             req.cursor,
@@ -53,11 +65,20 @@ class MoviesItemResource:
         if not movie:
             raise falcon.HTTPNotFound()
 
-        # if it exists update everything
+        # TODO update database record
         pass
 
     def on_delete(self, req, resp, id):
-        # should we check to see if it exists before deleting? try it
+        # check to see if exists
+        movie = get_only_result(
+            req.cursor,
+            self.__class__.GET_ITEM_QUERY,
+            {'id': id})
+
+        if not movie:
+            raise falcon.HTTPNotFound()
+
+        # TODO delete
         pass
 
 
@@ -90,9 +111,13 @@ class MoviesCollectionResource:
         INSERT INTO     movie(title, year, description)
         VALUE           (%(title)s, %(year)s, %(description)s)"""
 
-    # What about posting more than one?
-    def on_post(self, req, resp):
+    @use_args(request_args)
+    def on_post(self, req, resp, args):
+        # what happens if we send more than one? try that in the test
+
+        # Todo, grab each field from args and construct data
         data = req.media
+
         req.cursor.execute(self.__class__.ADD_MOVIE_QUERY, data)
         movie_id = req.cursor.lastrowid
         resp.location = '/movies/' + str(movie_id)
