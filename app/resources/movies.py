@@ -61,7 +61,7 @@ class MoviesItemResource:
         SET     title=%(title)s,
                 year=%(year)s,
                 description=%(description)s
-        WHERE   id = %(id)s;"""
+        WHERE   id=%(id)s;"""
 
     @use_args(request_args)
     def on_put(self, req, resp, args, id_):
@@ -74,15 +74,22 @@ class MoviesItemResource:
         if not movie:
             raise falcon.HTTPNotFound()
 
-        data = {
-            'id': id,
-            'title': args['title'],
-            'year': args['year'],
-            'description': args['description']
-        }
-        req.cursor.execute(self.__class__.UPDATE_MOVIE_QUERY, data)
+        try:
+            data = {
+                'id': id_,
+                'title': args['title'],
+                'year': args['year'],
+                'description': args['description'],
+            }
+        except KeyError:
+            raise falcon.HTTPBadRequest()
 
+        req.cursor.execute(self.__class__.UPDATE_MOVIE_QUERY, data)
         resp.status = falcon.HTTP_OK
+
+    DELETE_MOVIE_QUERY = """
+        DELETE FROM movie
+        WHERE       id=%(id)s"""
 
     def on_delete(self, req, resp, id_):
         # check to see if exists
@@ -93,6 +100,9 @@ class MoviesItemResource:
 
         if not movie:
             raise falcon.HTTPNotFound()
+
+        req.cursor.execute(self.__class__.DELETE_MOVIE_QUERY, {'id': id_})
+        resp.status = falcon.HTTP_OK
 
 
 class MoviesCollectionResource:
@@ -128,11 +138,17 @@ class MoviesCollectionResource:
 
     @use_args(request_args)
     def on_post(self, req, resp, args):
-        # what happens if we send more than one? try that in the test
+        try:
+            data = {
+                'title': args['title'],
+                'year': args['year'],
+                'description': args['description'],
+            }
+        except KeyError:
+            raise falcon.HTTPBadRequest()
 
-        data = req.media
         req.cursor.execute(self.__class__.INSERT_MOVIE_QUERY, data)
+
         movie_id = req.cursor.lastrowid
         resp.location = '/movies/' + str(movie_id)
-
         resp.status = falcon.HTTP_CREATED
