@@ -6,8 +6,7 @@ from webargs.falconparser import use_args
 # Create
 #   * collection
 #       * only updates 1
-#       * TODO create /movies/bulk endpoint
-#           * do we send back location header or locations in body?
+#       * also has bulk endpoints
 # Read
 #   * collection: 200;
 #       * Pagination should be set up via page and implemented with index and
@@ -28,21 +27,14 @@ def get_only_result(cursor, query, params):
     return cursor.fetchone()
 
 
-request_args = {
-    'id': fields.Int(location='json'),
-    'title': fields.String(location='json'),
-    'year': fields.Int(location='json'),
-    'description': fields.String(location='json'),
+create_movie_args = {
+    'title': fields.String(location='json', required=True),
+    'year': fields.Int(location='json', required=True),
+    'description': fields.String(location='json', required=True),
 }
 
-bulk_request_args = {
-    'data': fields.List(
-        fields.Nested({
-            'title': fields.String(location='json'),
-            'year': fields.Int(location='json'),
-            'description': fields.String(location='json'),
-        })
-    )
+bulk_create_movie_args = {
+    'data': fields.List(fields.Nested(create_movie_args), required=True)
 }
 
 # queries
@@ -88,7 +80,7 @@ class MoviesItemResource:
         resp.status = falcon.HTTP_OK
         resp.media = movie
 
-    @use_args(request_args)
+    @use_args(create_movie_args)
     def on_put(self, req, resp, args, id_):
         # check to see if exists
         movie = get_only_result(req.cursor, GET_ITEM_QUERY, {'id': id_})
@@ -96,15 +88,12 @@ class MoviesItemResource:
         if not movie:
             raise falcon.HTTPNotFound()
 
-        try:
-            data = {
-                'id': id_,
-                'title': args['title'],
-                'year': args['year'],
-                'description': args['description'],
-            }
-        except KeyError:
-            raise falcon.HTTPBadRequest()
+        data = {
+            'id': id_,
+            'title': args['title'],
+            'year': args['year'],
+            'description': args['description'],
+        }
 
         req.cursor.execute(UPDATE_MOVIE_QUERY, data)
         resp.status = falcon.HTTP_OK
@@ -139,7 +128,7 @@ class MoviesCollectionResource:
         resp.status = falcon.HTTP_OK
         resp.media = movies
 
-    @use_args(request_args)
+    @use_args(create_movie_args)
     def on_post(self, req, resp, args):
         try:
             data = {
@@ -159,16 +148,11 @@ class MoviesCollectionResource:
 
 class MoviesBulkAddResource:
     """Movies Bulk Add Resource"""
-    # TODO this might be a place to use Marshmallow, look into usecases
 
-    @use_args(bulk_request_args)
+    @use_args(bulk_create_movie_args)
     def on_post(self, req, resp, args):
-        try:
-            movies = args['data']
-        except KeyError:
-            raise falcon.HTTPBadRequest()
+        movies = args['data']
 
-        # TODO: should we do a try here?
         req.cursor.executemany(INSERT_MOVIE_QUERY, movies)
 
         movie_id = req.cursor.lastrowid
