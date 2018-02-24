@@ -33,6 +33,7 @@ create_movie_args = {
     'description': fields.String(location='json'),
 }
 
+
 bulk_create_movie_args = {
     'data': fields.List(fields.Nested(create_movie_args), required=True)
 }
