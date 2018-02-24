@@ -28,9 +28,9 @@ def get_only_result(cursor, query, params):
 
 
 create_movie_args = {
-    'title': fields.String(location='json', required=True),
-    'year': fields.Int(location='json', required=True),
-    'description': fields.String(location='json', required=True),
+    'title': fields.String(location='json'),
+    'year': fields.Int(location='json'),
+    'description': fields.String(location='json'),
 }
 
 bulk_create_movie_args = {
@@ -130,14 +130,11 @@ class MoviesCollectionResource:
 
     @use_args(create_movie_args)
     def on_post(self, req, resp, args):
-        try:
-            data = {
-                'title': args['title'],
-                'year': args['year'],
-                'description': args['description'],
-            }
-        except KeyError:
-            raise falcon.HTTPBadRequest()
+        data = {
+            'title': args['title'],
+            'year': args['year'],
+            'description': args['description'],
+        }
 
         req.cursor.execute(INSERT_MOVIE_QUERY, data)
 
