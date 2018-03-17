@@ -9,7 +9,7 @@ def populate_db(client):
     """
     Fixture to populate database and delete after running tests
 
-    Insert each element one at a time
+    BULK insert items
     """
     movie_to_enter = {
         "title": "Return of the Jedi",
@@ -22,11 +22,16 @@ def populate_db(client):
         """
         Insert item into database X number of times
         """
+        movies = dict()
+        movies['data'] = [movie_to_enter for _ in range(num_entries_to_insert)]
 
-        for i in range(num_entries_to_insert):
-            result = client.simulate_post('/movies', json=movie_to_enter)
-            created_id = result.headers['location'].split('/')[-1]
-            inserted_ids.append(created_id)
+        result = client.simulate_post('/movies/bulk', json=movies)
+        assert result.status == falcon.HTTP_CREATED
+        last_created_id = int(result.headers['location'].split('/')[-1])
+
+        # get list of ids created via bulk insert
+        inserted_ids.extend(list(
+            range(num_entries_to_insert + 1, last_created_id + 1)))
 
     yield _insert_item
 
@@ -88,9 +93,13 @@ def test_movies_delete_not_found(client):
     assert result.status == falcon.HTTP_NOT_FOUND
 
 
-def test_movies_post_get_put_delete(client):
+def test_movies_lifecycle(client):
     """
-    Test inserting movie, getting it, changing attribute, and deleting it
+    Test:
+        * POST single movie
+        * GET single movie
+        * PUT attribute of single movie
+        * DELETE single movie
     """
 
     movie_to_enter = {

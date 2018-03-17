@@ -20,23 +20,17 @@ from webargs.falconparser import use_args
 #   * item: delete item, return something in response body or 404
 #       * ASK CHRIS
 
-
-def get_only_result(cursor, query, params):
-    """Given cursor, query, and params, return item"""
-    cursor.execute(query, params)
-    return cursor.fetchone()
-
-
 create_movie_args = {
-    'title': fields.String(location='json'),
-    'year': fields.Int(location='json'),
-    'description': fields.String(location='json'),
+    'title': fields.String(location='json', required=True),
+    'year': fields.Int(location='json', required=True),
+    'description': fields.String(location='json', required=True),
 }
 
 
 bulk_create_movie_args = {
     'data': fields.List(fields.Nested(create_movie_args), required=True)
 }
+
 
 # queries
 DELETE_MOVIE_QUERY = """
@@ -69,8 +63,18 @@ UPDATE_MOVIE_QUERY = """
     WHERE   id=%(id)s;"""
 
 
+def get_only_result(cursor, query, params):
+    """
+    Given cursor, query, and params, return item
+    """
+    cursor.execute(query, params)
+    return cursor.fetchone()
+
+
 class MoviesItemResource:
-    """Single resource"""
+    """
+    Single resource
+    """
 
     def on_get(self, req, resp, id_):
         movie = get_only_result(req.cursor, GET_ITEM_QUERY, {'id': id_})
@@ -111,7 +115,9 @@ class MoviesItemResource:
 
 
 class MoviesCollectionResource:
-    """Movie collection"""
+    """
+    Movie collection
+    """
 
     def on_get(self, req, resp):
         # TODO add pagination
@@ -145,7 +151,9 @@ class MoviesCollectionResource:
 
 
 class MoviesBulkAddResource:
-    """Movies Bulk Add Resource"""
+    """
+    Movies Bulk Add Resource
+    """
 
     @use_args(bulk_create_movie_args)
     def on_post(self, req, resp, args):
