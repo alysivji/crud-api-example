@@ -105,3 +105,4 @@ ENV/
 # misc
 .DS_Store
 .vscode
+.pdbrc.py
