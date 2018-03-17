@@ -1,6 +1,6 @@
-# CRUD API with Tavern Tests
+# Falcon CRUD API
 
-This is a project for practicing creating a CRUD API in Falcon and testing it with tavern.
+This is a project for practicing creating a CRUD API in Falcon and testing it with pytest.
 
 ## Makefile Commands
 

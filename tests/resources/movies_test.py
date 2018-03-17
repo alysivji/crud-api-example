@@ -35,6 +35,9 @@ def populate_db(client):
 
 
 def test_movies_get_list(client, populate_db):
+    """
+    Test GET list of movies
+    """
     # Arrange
     NUM_RECORDS = 5
     populate_db(num_entries_to_insert=NUM_RECORDS)
@@ -47,20 +50,41 @@ def test_movies_get_list(client, populate_db):
     assert len(result.json) == NUM_RECORDS
 
 
-def test_movies_get_list_no_records(client):
+def test_movies_get_list_empty_db(client):
     """
-    Test getting list of movies from empty database
+    Test GET list of movies from empty database
     """
-
     result = client.simulate_get('/movies')
     assert result.status == falcon.HTTP_NOT_FOUND
 
 
 def test_movies_get_single_item_not_found(client):
     """
-    Test getting a single movie that does is not in database
+    Test GET a single movie that does is not in database
     """
     result = client.simulate_get('/movies/927402')
+    assert result.status == falcon.HTTP_NOT_FOUND
+
+
+def test_movies_put_not_found(client):
+    """
+    Test PUT a single movie that does is not in database
+    """
+    movie_to_update = {
+        "title": "Return of the Jedi",
+        "year": 1985,
+        "description": "Ewoks gallore"
+    }
+
+    result = client.simulate_put('/movies/927402', json=movie_to_update)
+    assert result.status == falcon.HTTP_NOT_FOUND
+
+
+def test_movies_delete_not_found(client):
+    """
+    Test DELETE a single movie that does is not in database
+    """
+    result = client.simulate_delete('/movies/927402')
     assert result.status == falcon.HTTP_NOT_FOUND
 
 
