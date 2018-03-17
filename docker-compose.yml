@@ -20,6 +20,7 @@ services:
       - db
     volumes:
       - .:/app
+      - ./.pdbrc.py:/home/sivpack/.pdbrc.py
     ports:
       - "7000:7000"
     stdin_open: true

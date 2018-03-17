@@ -53,7 +53,7 @@ test: migrate
 test_cov: migrate
 	docker-compose exec api pytest --verbose --cov
 
-test_view_cov: migrate
+test_cov_view: migrate
 	docker-compose exec api pytest --cov --cov-report html && open ./htmlcov/index.html
 
 test_fast: ## Can pass in parameters using p=''
