@@ -17,6 +17,8 @@ Usage:
  make migrate    run migrations
  make test       run tests
  make test_cov   run tests with coverage.py
+ make test_fast  run tests without migrations
+ make lint       run flake8 lintery
 
  make attach     attach to process inside service
  make logs       see container logs
