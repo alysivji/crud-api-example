@@ -88,7 +88,12 @@ class MoviesItemResource:
             raise falcon.HTTPNotFound()
 
         resp.status = falcon.HTTP_OK
-        resp.media = movie
+
+        results = {
+            'data': movie,
+            'error': '',
+        }
+        resp.media = results
 
     @use_args(create_movie_args)
     def on_put(self, req, resp, args, id_):

@@ -214,7 +214,7 @@ def test_movies_lifecycle(client):
 
     # GET
     result = client.simulate_get(f'/movies/{created_id}')
-    payload = result.json
+    payload = result.json['data']
     payload.pop('id')
 
     assert result.status == falcon.HTTP_OK
@@ -229,7 +229,7 @@ def test_movies_lifecycle(client):
 
     # GET
     result = client.simulate_get(f'/movies/{created_id}')
-    payload = result.json
+    payload = result.json['data']
     payload.pop('id')
 
     assert result.status == falcon.HTTP_OK
