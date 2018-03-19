@@ -88,7 +88,12 @@ class MoviesItemResource:
             raise falcon.HTTPNotFound()
 
         resp.status = falcon.HTTP_OK
-        resp.media = movie
+
+        results = {
+            'data': movie,
+            'error': '',
+        }
+        resp.media = results
 
     @use_args(create_movie_args)
     def on_put(self, req, resp, args, id_):
@@ -116,7 +121,7 @@ class MoviesItemResource:
             raise falcon.HTTPNotFound()
 
         req.cursor.execute(DELETE_MOVIE_QUERY, {'id': id_})
-        resp.status = falcon.HTTP_OK
+        resp.status = falcon.HTTP_NO_CONTENT
 
 
 class MoviesCollectionResource:

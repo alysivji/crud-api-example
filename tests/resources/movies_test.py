@@ -214,7 +214,7 @@ def test_movies_lifecycle(client):
 
     # GET
     result = client.simulate_get(f'/movies/{created_id}')
-    payload = result.json
+    payload = result.json['data']
     payload.pop('id')
 
     assert result.status == falcon.HTTP_OK
@@ -229,7 +229,7 @@ def test_movies_lifecycle(client):
 
     # GET
     result = client.simulate_get(f'/movies/{created_id}')
-    payload = result.json
+    payload = result.json['data']
     payload.pop('id')
 
     assert result.status == falcon.HTTP_OK
@@ -238,7 +238,7 @@ def test_movies_lifecycle(client):
     # DELETE
     result = client.simulate_delete(f'/movies/{created_id}')
 
-    assert result.status == falcon.HTTP_OK
+    assert result.status == falcon.HTTP_NO_CONTENT
 
 
 def test_malformed_post_request(client):

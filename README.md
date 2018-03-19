@@ -2,7 +2,24 @@
 
 This is a project for practicing creating a CRUD API in Falcon and testing it with pytest.
 
-## Makefile Commands
+## API Documentation
+
+[Detailed documentation](docs/api/).
+
+## Installation Instructions
+
+Require Docker.
+
+1. Install Docker
+1. Clone repo
+
+```console
+make build
+make up
+make test
+```
+
+### Makefile Commands
 
 ```text
 Makefile for managing the SivDev Microservice
@@ -17,6 +34,8 @@ Usage:
  make migrate    run migrations
  make test       run tests
  make test_cov   run tests with coverage.py
+ make test_fast  run tests without migrations
+ make lint       run flake8 lintery
 
  make attach     attach to process inside service
  make logs       see container logs
