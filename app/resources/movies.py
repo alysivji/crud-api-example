@@ -121,7 +121,7 @@ class MoviesItemResource:
             raise falcon.HTTPNotFound()
 
         req.cursor.execute(DELETE_MOVIE_QUERY, {'id': id_})
-        resp.status = falcon.HTTP_OK
+        resp.status = falcon.HTTP_NO_CONTENT
 
 
 class MoviesCollectionResource:

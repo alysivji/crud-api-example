@@ -238,7 +238,7 @@ def test_movies_lifecycle(client):
     # DELETE
     result = client.simulate_delete(f'/movies/{created_id}')
 
-    assert result.status == falcon.HTTP_OK
+    assert result.status == falcon.HTTP_NO_CONTENT
 
 
 def test_malformed_post_request(client):
