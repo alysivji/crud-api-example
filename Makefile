@@ -48,13 +48,13 @@ migrate: up ## Run migrations using flyway
 	docker-compose run --rm migrate
 
 test: migrate
-	docker-compose exec api pytest
+	docker-compose exec api pytest --runslow
 
 test_cov: migrate
-	docker-compose exec api pytest --verbose --cov
+	docker-compose exec api pytest --runslow --verbose --cov
 
 test_cov_view: migrate
-	docker-compose exec api pytest --cov --cov-report html && open ./htmlcov/index.html
+	docker-compose exec api pytest --runslow --cov --cov-report html && open ./htmlcov/index.html
 
 test_fast: ## Can pass in parameters using p=''
 	docker-compose exec api pytest $(p)
