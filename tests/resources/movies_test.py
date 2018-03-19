@@ -33,7 +33,7 @@ def populate_db(client):
 
         # get list of ids created via bulk insert
         inserted_ids.extend(list(
-            range(num_entries_to_insert + 1, last_created_id + 1)))
+            range(last_created_id - num_entries_to_insert, last_created_id + 1)))
 
     yield _insert_item
 
@@ -74,7 +74,6 @@ def test_movies_get_list_nonint_param(client, populate_db):
     assert result.status == falcon.HTTP_UNPROCESSABLE_ENTITY
 
 
-@pytest.mark.slow
 def test_movies_get_list_paginated_less_than_one_page(client, populate_db):
     """
     Test GET list of movies with pagination
@@ -92,7 +91,6 @@ def test_movies_get_list_paginated_less_than_one_page(client, populate_db):
     assert result.json['last_id'] == result.json['data'][-1]['id']
 
 
-@pytest.mark.slow
 def test_movies_get_list_paginated_exactly_one_page(client, populate_db):
     """
     Test GET list of movies with pagination
@@ -122,7 +120,6 @@ def test_movies_get_list_paginated_exactly_one_page(client, populate_db):
     assert result.status == falcon.HTTP_NOT_FOUND
 
 
-@pytest.mark.slow
 def test_movies_get_list_paginated_greater_than_one_page(client, populate_db):
     """
     Test GET list of movies with pagination
