@@ -2,7 +2,24 @@
 
 This is a project for practicing creating a CRUD API in Falcon and testing it with pytest.
 
-## Makefile Commands
+## API Documentation
+
+[Detailed documentation](docs/api/).
+
+## Installation Instructions
+
+Require Docker.
+
+1. Install Docker
+1. Clone repo
+
+```console
+make build
+make up
+make test
+```
+
+### Makefile Commands
 
 ```text
 Makefile for managing the SivDev Microservice
