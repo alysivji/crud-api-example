@@ -2,6 +2,8 @@ import falcon
 from webargs import fields
 from webargs.falconparser import use_args
 
+from app.config import PAGE_SIZE
+
 # Done
 # Create
 #   * collection
@@ -18,7 +20,6 @@ from webargs.falconparser import use_args
 # Delete
 #   * collection: DELETE not allowed
 #   * item: delete item, return something in response body or 404
-#       * ASK CHRIS
 
 create_movie_args = {
     'title': fields.String(location='json', required=True),
@@ -26,25 +27,25 @@ create_movie_args = {
     'description': fields.String(location='json', required=True),
 }
 
-
 bulk_create_movie_args = {
     'data': fields.List(fields.Nested(create_movie_args), required=True)
 }
-
 
 # queries
 DELETE_MOVIE_QUERY = """
     DELETE FROM     movie
     WHERE           id=%(id)s"""
 
+GET_COLLECTION_QUERY = """
+    SELECT  *
+    FROM    movie
+    LIMIT   %(page_size)s;"""
+
 GET_COLLECTION_PAGINATION_QUERY = """
     SELECT  *
     FROM    movie
-    WHERE   id > %(start_with)s;"""
-
-GET_COLLECTION_QUERY = """
-    SELECT  *
-    FROM    movie;"""
+    WHERE   id > %(last_id)s
+    LIMIT   %(page_size)s;"""
 
 GET_ITEM_QUERY = """
     SELECT  *
@@ -120,20 +121,30 @@ class MoviesCollectionResource:
     """
 
     def on_get(self, req, resp):
-        # TODO add pagination
-        # use page=2 and limit and offset in the backend
-        # what param should we send back to get it working?
-        if 'next_record' in req.params:
-            pass
+        data = {}
+        data['page_size'] = PAGE_SIZE
 
-        req.cursor.execute(GET_COLLECTION_QUERY)
+        if 'last_id' in req.params:
+            data['last_id'] = req.params['last_id']
+            sql_query = GET_COLLECTION_PAGINATION_QUERY
+        else:
+            sql_query = GET_COLLECTION_QUERY
+
+        req.cursor.execute(sql_query, data)
         movies = req.cursor.fetchall()
 
         if not movies:
             raise falcon.HTTPNotFound()
 
         resp.status = falcon.HTTP_OK
-        resp.media = movies
+
+        results = {
+            'data': movies,
+            'last_id': movies[-1]['id'],
+            'error': '',
+        }
+
+        resp.media = results
 
     @use_args(create_movie_args)
     def on_post(self, req, resp, args):

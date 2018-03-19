@@ -3,6 +3,8 @@
 import falcon
 import pytest
 
+from app.config import PAGE_SIZE
+
 
 @pytest.fixture
 def populate_db(client):
@@ -52,7 +54,83 @@ def test_movies_get_list(client, populate_db):
 
     # Assert
     assert result.status == falcon.HTTP_OK
-    assert len(result.json) == NUM_RECORDS
+    assert len(result.json['data']) == NUM_RECORDS
+    assert result.json['last_id'] == result.json['data'][-1]['id']
+
+
+def test_movies_get_list_paginated_less_than_one_page(client, populate_db):
+    """
+    Test GET list of movies with pagination
+    """
+    # Arrange
+    NUM_RECORDS = PAGE_SIZE - 1
+    populate_db(num_entries_to_insert=NUM_RECORDS)
+
+    # Act
+    result = client.simulate_get('/movies')
+
+    # Assert
+    assert result.status == falcon.HTTP_OK
+    assert len(result.json['data']) == NUM_RECORDS
+    assert result.json['last_id'] == result.json['data'][-1]['id']
+
+
+def test_movies_get_list_paginated_exactly_one_page(client, populate_db):
+    """
+    Test GET list of movies with pagination
+    """
+    # Arrange
+    NUM_RECORDS = PAGE_SIZE
+    populate_db(num_entries_to_insert=NUM_RECORDS)
+
+    # Act
+    result = client.simulate_get('/movies')
+
+    # Assert
+    assert result.status == falcon.HTTP_OK
+    assert len(result.json['data']) == NUM_RECORDS
+    last_id = result.json['data'][-1]['id']
+    assert result.json['last_id'] == last_id
+
+    """
+    GET 2nd page (should not have any results)
+    """
+    # Act
+    params = {'last_id': last_id}
+    result = client.simulate_get('/movies', params=params)
+
+    # Assert
+    assert result.status == falcon.HTTP_NOT_FOUND
+
+
+def test_movies_get_list_paginated_greater_than_one_page(client, populate_db):
+    """
+    Test GET list of movies with pagination
+    """
+    # Arrange
+    NUM_RECORDS = PAGE_SIZE + 1
+    populate_db(num_entries_to_insert=NUM_RECORDS)
+
+    # Act
+    result = client.simulate_get('/movies')
+
+    # Assert
+    assert result.status == falcon.HTTP_OK
+    assert len(result.json['data']) == PAGE_SIZE
+    last_id = result.json['data'][-1]['id']
+    assert result.json['last_id'] == last_id
+
+    """
+    GET 2nd page (should not have 1 entry)
+    """
+    # Act
+    params = {'last_id': last_id}
+    result = client.simulate_get('/movies', params=params)
+
+    # Assert
+    assert result.status == falcon.HTTP_OK
+    assert len(result.json['data']) == 1
+    assert result.json['last_id'] == result.json['data'][-1]['id']
 
 
 def test_movies_get_list_empty_db(client):
