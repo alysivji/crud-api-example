@@ -31,6 +31,10 @@ bulk_create_movie_args = {
     'data': fields.List(fields.Nested(create_movie_args), required=True)
 }
 
+pagination_args = {
+    'last_id': fields.Int(location='query')
+}
+
 # queries
 DELETE_MOVIE_QUERY = """
     DELETE FROM     movie
@@ -120,12 +124,13 @@ class MoviesCollectionResource:
     Movie collection
     """
 
-    def on_get(self, req, resp):
+    @use_args(pagination_args)
+    def on_get(self, req, resp, args):
         data = {}
         data['page_size'] = PAGE_SIZE
 
-        if 'last_id' in req.params:
-            data['last_id'] = req.params['last_id']
+        if 'last_id' in args:
+            data['last_id'] = args['last_id']
             sql_query = GET_COLLECTION_PAGINATION_QUERY
         else:
             sql_query = GET_COLLECTION_QUERY

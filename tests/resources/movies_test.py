@@ -58,6 +58,7 @@ def test_movies_get_list(client, populate_db):
     assert result.json['last_id'] == result.json['data'][-1]['id']
 
 
+@pytest.mark.slow
 def test_movies_get_list_paginated_less_than_one_page(client, populate_db):
     """
     Test GET list of movies with pagination
@@ -75,6 +76,7 @@ def test_movies_get_list_paginated_less_than_one_page(client, populate_db):
     assert result.json['last_id'] == result.json['data'][-1]['id']
 
 
+@pytest.mark.slow
 def test_movies_get_list_paginated_exactly_one_page(client, populate_db):
     """
     Test GET list of movies with pagination
@@ -103,6 +105,7 @@ def test_movies_get_list_paginated_exactly_one_page(client, populate_db):
     assert result.status == falcon.HTTP_NOT_FOUND
 
 
+@pytest.mark.slow
 def test_movies_get_list_paginated_greater_than_one_page(client, populate_db):
     """
     Test GET list of movies with pagination
