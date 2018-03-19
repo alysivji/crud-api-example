@@ -239,3 +239,39 @@ def test_movies_lifecycle(client):
     result = client.simulate_delete(f'/movies/{created_id}')
 
     assert result.status == falcon.HTTP_OK
+
+
+def test_malformed_post_request(client):
+    """
+    Test malformed POST request for single movie
+    """
+
+    # Missing Title
+    movie_missing_title = {
+        "year": 1985,
+        "description": "Ewoks gallore"
+    }
+    result = client.simulate_post('/movies', json=movie_missing_title)
+
+    assert result.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+    assert 'title' in result.json['errors']
+
+    # Missing Year
+    movie_missing_year = {
+        "title": "Return of the Jedi",
+        "description": "Ewoks gallore"
+    }
+    result = client.simulate_post('/movies', json=movie_missing_year)
+
+    assert result.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+    assert 'year' in result.json['errors']
+
+    # Missing Year
+    movie_missing_desc = {
+        "title": "Return of the Jedi",
+        "year": 1985
+    }
+    result = client.simulate_post('/movies', json=movie_missing_desc)
+
+    assert result.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+    assert 'description' in result.json['errors']
