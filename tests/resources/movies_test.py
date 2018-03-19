@@ -58,6 +58,22 @@ def test_movies_get_list(client, populate_db):
     assert result.json['last_id'] == result.json['data'][-1]['id']
 
 
+def test_movies_get_list_nonint_param(client, populate_db):
+    """
+    Test GET list of movies with wrong type of query parameter
+    """
+    # Arrange
+    NUM_RECORDS = 5
+    populate_db(num_entries_to_insert=NUM_RECORDS)
+    params = {'last_id': 'word'}
+
+    # Act
+    result = client.simulate_get('/movies', params=params)
+
+    # Assert
+    assert result.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+
+
 @pytest.mark.slow
 def test_movies_get_list_paginated_less_than_one_page(client, populate_db):
     """
@@ -97,8 +113,9 @@ def test_movies_get_list_paginated_exactly_one_page(client, populate_db):
     """
     GET 2nd page (should not have any results)
     """
-    # Act
     params = {'last_id': last_id}
+
+    # Act
     result = client.simulate_get('/movies', params=params)
 
     # Assert
@@ -126,8 +143,9 @@ def test_movies_get_list_paginated_greater_than_one_page(client, populate_db):
     """
     GET 2nd page (should not have 1 entry)
     """
-    # Act
     params = {'last_id': last_id}
+
+    # Act
     result = client.simulate_get('/movies', params=params)
 
     # Assert
