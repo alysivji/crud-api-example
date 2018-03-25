@@ -1,0 +1,20 @@
+pipeline:
+  migrations:
+    image: boxfuse/flyway:4.2-alpine
+    commands:
+      - sleep 15
+      - cp sql/*.sql /flyway/sql
+      - flyway -url=jdbc:mysql://db/sivdev -user=sivpack -password=sivpack_dev migrate
+  build:
+    image: python:3.6.4-slim-jessie
+    commands:
+      - pip install -r requirements_dev.txt
+      - pytest
+services:
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=my_secret_pw_shh
+      - MYSQL_DATABASE=sivdev
+      - MYSQL_USER=sivpack
+      - MYSQL_PASSWORD=sivpack_dev
