@@ -1,0 +1,14 @@
+pipeline:
+  build:
+    image: python:3.6
+    commands:
+      - pip install -r requirements_dev.txt
+      - pytest
+services:
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=my_secret_pw_shh
+      - MYSQL_DATABASE=sivdev
+      - MYSQL_USER=sivpack
+      - MYSQL_PASSWORD=sivpack_dev
